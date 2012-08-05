@@ -59,10 +59,10 @@ module RedmineCharts
 
     def self.to_column(symbol, table)
       case symbol
-      when :user_id then "#{table}.user_id"
+      when :user_id then table == 'issues' ? "issues.author_id" : "#{table}.user_id"
       when :author_id then "issues.author_id"
       when :assigned_to_id then "issues.assigned_to_id"
-      when :issue_id then "#{table}.issue_id"
+      when :issue_id then table == 'issues' ? "issues.id" : "#{table}.issue_id"
       when :activity_id then "#{table}.activity_id"
       when :category_id then "issues.category_id"
       when :priority_id then "issues.priority_id"

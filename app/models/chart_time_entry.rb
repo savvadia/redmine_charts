@@ -3,7 +3,10 @@ class ChartTimeEntry < ActiveRecord::Base
   belongs_to :issue
 
   def self.get_timeline(raw_group, raw_conditions, range)
+    puts "ChartTimeEntry:get_timeline():: raw_group=" << raw_group.inspect << ", raw_conditions=" << raw_conditions.inspect
+
     group = RedmineCharts::GroupingUtils.to_column(raw_group, "chart_time_entries")
+    puts "ChartTimeEntry:get_timeline():: group=" << group.inspect
 
     conditions = {}
 
@@ -37,6 +40,8 @@ class ChartTimeEntry < ActiveRecord::Base
     end
 
     conditions[range[:column]] = range[:min]..range[:max]
+    
+    puts "ChartTimeEntry:get_timeline():: select=" << select.inspect << ", conditions=" << conditions.inspect
 
     grouping = "#{range[:column]}"
     grouping << ", #{group}" if group

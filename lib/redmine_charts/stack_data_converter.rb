@@ -14,6 +14,7 @@ module RedmineCharts
 
       keys = []
       values = []
+      addEstimatedHoursLabel = false
 
       data[:sets].each_with_index do |set,i|
         set[1].each_with_index do |v,j|
@@ -26,10 +27,13 @@ module RedmineCharts
             v
           end
         end
+        if set[0] == l(:charts_deviation_group_logged)
+			addEstimatedHoursLabel = true
+		end
         keys << {:colour => RedmineCharts::Utils.color(i), :text => set[0], :"font-size" => 10}
       end
 
-      keys << {:colour => '#000000', :text => l(:charts_deviation_group_estimated), :"font-size" => 10}
+      keys << {:colour => '#000000', :text => l(:charts_deviation_group_estimated), :"font-size" => 10} if addEstimatedHoursLabel == true
 
       bar.values = values
       bar.set_keys(keys)

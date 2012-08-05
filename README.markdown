@@ -9,6 +9,8 @@ Download the sources and put them to your vendor/plugins folder.
 
     $ cd {REDMINE_ROOT}
     $ git clone git://github.com/mszczytowski/redmine_charts.git vendor/plugins/redmine_charts
+    or
+    $ git clone git://github.com/cou2jpn/redmine_charts.git vendor/plugins/redmine_charts
 
 Install OpenFlashChart plugin. 
 
@@ -52,6 +54,18 @@ Add permission to Your user.
 Thanks for the contribution. 
 
 ## Changelog
+
+## 0.1.4
+- Added new chart types:
+   - Inflow: reported issues timeline
+   - Outflow: resolved/closed issues timeline
+   - Worklist: open issues timeline
+
+## 0.1.3
+- ...
+
+## 0.1.2
+- ...
 
 ## 0.1.1
 - compatible with Redmine 1.1.2
