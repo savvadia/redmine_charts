@@ -2,7 +2,6 @@ class ChartsInflowController < ChartsController
 
   unloadable
   protected
-  require 'pp'
   
   def get_data
 
@@ -18,9 +17,9 @@ class ChartsInflowController < ChartsController
         index = @range[:keys].index(row.range_value.to_s)
         if index
           sets[group_name] ||= Array.new(@range[:keys].size, [0, get_hints])
-          sets[group_name][index] = [row.logged_hours.to_i, get_hints(row)]
+          sets[group_name][index] = [row.entries.to_i, get_hints(row.entries.to_i, group_name, @range[:labels][index], @range[:keys][index])]
           noOfEntriesPerSlot[index] ||= 0
-          noOfEntriesPerSlot[index] += row.logged_hours.to_i
+          noOfEntriesPerSlot[index] += row.entries.to_i
           max = noOfEntriesPerSlot[index] if max < noOfEntriesPerSlot[index]
         else
           raise row.range_value.to_s
@@ -40,11 +39,11 @@ class ChartsInflowController < ChartsController
     }
   end
 
-  def get_hints(record = nil)
-    unless record.nil?
-      l(:charts_inflow_hint, { :trs => RedmineCharts::Utils.round(record.logged_hours) })
+  def get_hints(entries = nil, group = "", range = "", key = "")
+    unless entries.nil?
+      l(:charts_worklist_hint, { :trs => entries.to_s, :group => group, :range => range, :key => key })
     else
-      l(:charts_inflow_hint_empty)
+      l(:charts_worklist_hint_empty)
     end
   end
 

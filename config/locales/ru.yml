@@ -40,20 +40,20 @@ ru:
 
   charts_worklist_x: ""
   charts_worklist_y: "задачи"
-  charts_worklist_hint: "%{trs} задачи"
-  charts_worklist_hint_empty: "0 задач"
+  charts_worklist_hint: "%{trs} %{group}: %{range} (%{key})"
+  charts_worklist_hint_empty: "Нет задач"
   charts_worklist_help: "Открытые задачи: диаграмма задач, находящихся в работе."
 
   charts_inflow_x: ""
   charts_inflow_y: "задачи"
-  charts_inflow_hint: "%{trs} задачи"
-  charts_inflow_hint_empty: "0 задач"
+  charts_inflow_hint: "%{trs} %{group}: %{range} (%{key})"
+  charts_inflow_hint_empty: "Нет задач"
   charts_inflow_help: "Входящие задачи: диаграмма поступления новых задач."
 
   charts_outflow_x: ""
   charts_outflow_y: "задачи"
-  charts_outflow_hint: "%{trs} задачи"
-  charts_outflow_hint_empty: "0 задач"
+  charts_outflow_hint: "%{trs} %{group}: %{range} (%{key})"
+  charts_outflow_hint_empty: "Нет задач"
   charts_outflow_help: "Исходящие задачи: диаграмма вывода задач из работы."
 
   charts_burndown_x: ""

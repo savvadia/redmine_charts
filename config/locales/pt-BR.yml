@@ -132,18 +132,19 @@
 
   charts_worklist_x: ""
   charts_worklist_y: "issues"
-  charts_worklist_hint: "%{trs} issues"
-  charts_worklist_hint_empty: "0 issues"
+  charts_worklist_hint: "%{trs} %{group}: %{range} (%{key})"
+  charts_worklist_hint_empty: "No issues"
   charts_worklist_help: "Worklist: timeline of open issues."
 
   charts_inflow_x: ""
   charts_inflow_y: "issues"
-  charts_inflow_hint: "%{trs} issues"
-  charts_inflow_hint_empty: "0 issues"
+  charts_inflow_hint: "%{trs} %{group}: %{range} (%{key})"
+  charts_inflow_hint_empty: "No issues"
   charts_inflow_help: "Inflow: incoming (reported) issues timeline."
 
   charts_outflow_x: ""
   charts_outflow_y: "issues"
-  charts_outflow_hint: "%{trs} issues"
-  charts_outflow_hint_empty: "0 issues"
+  charts_outflow_hint: "%{trs} %{group}: %{range} (%{key})"
+  charts_outflow_hint_empty: "No issues"
   charts_outflow_help: "Outflow: outgoing (closed) issues timeline."
+

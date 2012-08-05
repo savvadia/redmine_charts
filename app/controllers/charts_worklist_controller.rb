@@ -2,7 +2,6 @@ class ChartsWorklistController < ChartsController
 
   unloadable
   protected
-  require 'pp'
   
   def get_data
 
@@ -12,26 +11,19 @@ class ChartsWorklistController < ChartsController
 	@range = range_in
     rows_snap = ChartIssueEntry.snapshot_till(@grouping, @conditions, @range)
 
-	#puts "IN:::ChartsWorklistController"
-	#pp rows_in
-	#puts "OUT:::ChartsWorklistController"
-	#pp rows_out
-	#puts "SNAP:::ChartsWorklistController"
-	#pp rows_snap
-
 	@range = range_in
     sets = {}
     groups = []
     max = 0
-
 
     if rows_in.size > 0 or rows_out.size > 0
       rows_in.each do |row|
         group_name = RedmineCharts::GroupingUtils.to_string(row.group_id, @grouping)
         index = @range[:keys].index(row.range_value.to_s)
         if index
-          sets[group_name] ||= Array.new(@range[:keys].size, 0)
-          sets[group_name][index] += row.logged_hours.to_i
+          sets[group_name] ||= Array.new(@range[:keys].size, [0, ""])
+          entries = sets[group_name][index][0] + row.entries.to_i
+          sets[group_name][index] = [entries, ""]
         else
           raise row.range_value.to_s
         end
@@ -41,8 +33,9 @@ class ChartsWorklistController < ChartsController
         group_name = RedmineCharts::GroupingUtils.to_string(row.group_id, @grouping)
         index = @range[:keys].index(row.range_value.to_s)
         if index
-          sets[group_name] ||= Array.new(@range[:keys].size, 0)
-          sets[group_name][index] -= row.logged_hours.to_i
+          sets[group_name] ||= Array.new(@range[:keys].size, [0, ""])
+          entries = sets[group_name][index][0] - row.entries.to_i
+          sets[group_name][index] = [entries, ""]
         else
           raise row.range_value.to_s
         end
@@ -50,17 +43,17 @@ class ChartsWorklistController < ChartsController
     else
       sets[""] ||= Array.new(@range[:keys].size, [0, get_hints])
     end
-    
+
     noOfEntriesPerSlot = {}
     max = 0
 
-    
     if sets.keys.size > 0
 	  sets.keys.each do | group_name |
 		  prev_value = (rows_snap.include? group_name) ? rows_snap[group_name] : 0
 		  (0..@range[:keys].size-1).each do |index|
-			sets[group_name][index] += prev_value
-			prev_value = sets[group_name][index]
+			entries = sets[group_name][index][0] + prev_value
+            sets[group_name][index] = [entries, get_hints(entries, group_name, @range[:labels][index], @range[:keys][index])]
+			prev_value = entries
             noOfEntriesPerSlot[index] ||= 0
             noOfEntriesPerSlot[index] += prev_value
             max = noOfEntriesPerSlot[index] if max < noOfEntriesPerSlot[index]
@@ -78,9 +71,9 @@ class ChartsWorklistController < ChartsController
     }
   end
 
-  def get_hints(record = nil)
-    unless record.nil?
-      l(:charts_worklist_hint, { :trs => RedmineCharts::Utils.round(record.logged_hours) })
+  def get_hints(entries = nil, group = "", range = "", key = "")
+    unless entries.nil?
+      l(:charts_worklist_hint, { :trs => entries.to_s, :group => group, :range => range, :key => key })
     else
       l(:charts_worklist_hint_empty)
     end

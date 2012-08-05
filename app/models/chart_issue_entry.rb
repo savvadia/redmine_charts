@@ -1,6 +1,5 @@
 class ChartIssueEntry < ActiveRecord::Base
 
-  require 'pp'
   belongs_to :issue
 
   def self.get_inflow_timeline(raw_group, raw_conditions, range)
@@ -45,7 +44,7 @@ class ChartIssueEntry < ActiveRecord::Base
 	  range[:column] = "week"
 	end
 
-    select = "#{range_value} as range_value, '#{range[:range]}' as range_type, count(*) as logged_hours, 1 as entries, '#{raw_group}' as grouping"
+    select = "#{range_value} as range_value, '#{range[:range]}' as range_type, count(*) as entries, '#{raw_group}' as grouping"
 
     if group
       select << ", #{group} as group_id"
@@ -56,10 +55,10 @@ class ChartIssueEntry < ActiveRecord::Base
     grouping = (group ? group : "project_id")
     grouping << ", range_value HAVING range_value BETWEEN #{range[:min]} AND #{range[:max]}"
     
-    rows = Issue.all(:select => select, :conditions => conditions, :readonly => true, :group => grouping, :order => "1 asc, 6 asc")
+    rows = Issue.all(:select => select, :conditions => conditions, :readonly => true, :group => grouping, :order => "1 asc, 5 asc")
 
     rows.each do |row|
-      #puts "ChartIssueEntry:get_inflow_timeline():: row=" << row.range_value.inspect << ", #=" << row.logged_hours.inspect
+      #puts "ChartIssueEntry:get_inflow_timeline():: row=" << row.range_value.inspect << ", #=" << row.entries.inspect
       row.group_id = '0' unless row.group_id
     end
 
@@ -108,7 +107,7 @@ class ChartIssueEntry < ActiveRecord::Base
 	  range[:column] = "week"
 	end
 
-    select = "#{range_value} as range_value, '#{range[:range]}' as range_type, count(*) as logged_hours, 1 as entries, '#{raw_group}' as grouping"
+    select = "#{range_value} as range_value, '#{range[:range]}' as range_type, count(*) as entries, '#{raw_group}' as grouping"
 
     if group
       select << ", #{group} as group_id"
@@ -123,10 +122,10 @@ class ChartIssueEntry < ActiveRecord::Base
     conditions['journal_details.prop_key']  = 'status_id'
     conditions['issue_statuses.is_closed']  = 1
 
-    rows = Journal.all(:select => select, :joins => joins, :conditions => conditions, :readonly => true, :group => grouping, :order => "1 asc, 6 asc")
+    rows = Journal.all(:select => select, :joins => joins, :conditions => conditions, :readonly => true, :group => grouping, :order => "1 asc, 5 asc")
 
     rows.each do |row|
-      # puts "ChartIssueEntry:get_outflow_timeline():: row=" << row.range_value.inspect << ", #=" << row.logged_hours.inspect
+      # puts "ChartIssueEntry:get_outflow_timeline():: row=" << row.range_value.inspect << ", #=" << row.entries.inspect
       row.group_id = '0' unless row.group_id
     end
 
@@ -141,7 +140,7 @@ class ChartIssueEntry < ActiveRecord::Base
     # inflow snapshot
     group = RedmineCharts::GroupingUtils.to_column(raw_group, "issues")
 
-    select = "count(*) as logged_hours"
+    select = "count(*) as entries"
     if group
       select << ", #{group} as group_id"
     else
@@ -178,9 +177,9 @@ class ChartIssueEntry < ActiveRecord::Base
     rows_in.each do |row|
       row.group_id = '0' unless row.group_id
       group_name = RedmineCharts::GroupingUtils.to_string(row.group_id, raw_group)
-      # puts "snapshot_till():: row TRs=" << row.logged_hours.inspect << ", group=" << row.group_id.inspect << ", group_name=" << group_name
+      # puts "snapshot_till():: row TRs=" << row.entries.inspect << ", group=" << row.group_id.inspect << ", group_name=" << group_name
 	  rows_snap[group_name] ||= 0
-	  rows_snap[group_name] += row.logged_hours.to_i
+	  rows_snap[group_name] += row.entries.to_i
     end
     
     # outflow snapshot
@@ -200,85 +199,24 @@ class ChartIssueEntry < ActiveRecord::Base
 		:group => grouping)
 
     rows_out.each do |row|
-      # puts "snapshot_till():: row TRs=" << row.logged_hours.inspect << ", group=" << row.group_id.inspect
+      # puts "snapshot_till():: row TRs=" << row.entries.inspect << ", group=" << row.group_id.inspect
       row.group_id = '0' unless row.group_id
       group_name = RedmineCharts::GroupingUtils.to_string(row.group_id, @grouping)
 	  rows_snap[group_name] ||= 0
-	  rows_snap[group_name] -= row.logged_hours.to_i
+	  rows_snap[group_name] -= row.entries.to_i
     end
 
     rows_snap
   end
 
   def self.get_aggregation_for_issue(raw_conditions, range)
-    group = RedmineCharts::GroupingUtils.to_column(:issue_id, "chart_time_entries")
-
-    conditions = {}
-
-    raw_conditions.each do |c, v|
-      column_name = RedmineCharts::ConditionsUtils.to_column(c, "chart_time_entries")
-      conditions[column_name] = v if v and column_name
-    end
-
-    range = RedmineCharts::RangeUtils.prepare_range(range)
-    
-    range[:column] = RedmineCharts::ConditionsUtils.to_column(range[:range], "chart_time_entries")
-
-    conditions[range[:column]] = '1'..range[:max]
-
-    joins = "left join issues on issues.id = issue_id"
-    select = "sum(logged_hours) as logged_hours, chart_time_entries.issue_id as issue_id"
-
-    rows = all(:joins => joins, :select => select, :conditions => conditions, :readonly => true, :group => group, :order => "1 desc, 2 asc")
-
-    issues = {}
-
-    rows.each do |row|
-      issues[row.issue_id.to_i] = row.logged_hours.to_f
-    end
-
-    issues
+    flash[:error] = "Aggregation is not supported"
+    nil
   end
 
   def self.get_aggregation(raw_group, raw_conditions)
-    raw_group ||= :user_id
-    group = RedmineCharts::GroupingUtils.to_column(raw_group, "chart_time_entries")
-
-    conditions = {}
-
-    raw_conditions.each do |c, v|
-      column_name = RedmineCharts::ConditionsUtils.to_column(c, "chart_time_entries")
-      conditions[column_name] = v if v and column_name
-    end
-
-    conditions[:day] = 0
-    conditions[:week] = 0
-    conditions[:month] = 0
-
-    joins = "left join issues on issues.id = issue_id"
-
-    select = "sum(logged_hours) as logged_hours, sum(entries) as entries, #{group} as group_id, '#{raw_group}' as grouping"
-
-    if group == 'chart_time_entries.issue_id'
-      select << ", issues.estimated_hours as estimated_hours, issues.subject as subject"
-      group << ", issues.estimated_hours, issues.subject"
-
-      if RedmineCharts.has_sub_issues_functionality_active
-        select << ", issues.root_id, issues.parent_id"
-        group << ", issues.root_id, issues.parent_id"
-      else
-        select << ", chart_time_entries.issue_id as root_id, null as parent_id"
-      end
-    else
-      select << ", 0 as estimated_hours"
-    end
-
-    rows = all(:joins => joins, :select => select, :conditions => conditions, :readonly => true, :group => group, :order => "1 desc, 3 asc")
-
-    rows.each do |row|
-      row.group_id = '0' unless row.group_id
-      row.estimated_hours = '0' unless row.estimated_hours
-    end
+    flash[:error] = "Aggregation is not supported"
+    nil
   end
 
 end
