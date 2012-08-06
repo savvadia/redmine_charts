@@ -57,6 +57,19 @@ module RedmineCharts
       end
     end
 
+    def self.to_string_and_order(id, grouping, default = nil)
+      if grouping == :priority_id and priority = IssuePriority.find_by_id(id.to_i)
+        order = priority.position
+      elsif grouping == :status_id and status = IssueStatus.find_by_id(id.to_i)
+        order = status.position
+      elsif grouping == :issue_id
+        order = id.to_i
+      else
+        order = 0
+      end
+      [self.to_string(id, grouping, default), order]
+    end
+
     def self.to_column(symbol, table)
       case symbol
       when :user_id then table == 'issues' ? "issues.author_id" : "#{table}.user_id"

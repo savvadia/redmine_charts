@@ -58,8 +58,8 @@ class ChartIssueEntry < ActiveRecord::Base
     rows = Issue.all(:select => select, :conditions => conditions, :readonly => true, :group => grouping, :order => "1 asc, 5 asc")
 
     rows.each do |row|
-      #puts "ChartIssueEntry:get_inflow_timeline():: row=" << row.range_value.inspect << ", #=" << row.entries.inspect
       row.group_id = '0' unless row.group_id
+      # puts "ChartIssueEntry:get_inflow_timeline():: row=" << row.range_value.inspect << ", #=" << row.entries.inspect << ", groupId=" << row.group_id
     end
 
     [rows, range]

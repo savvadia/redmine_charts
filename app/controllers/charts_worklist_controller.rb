@@ -12,13 +12,14 @@ class ChartsWorklistController < ChartsController
     rows_snap = ChartIssueEntry.snapshot_till(@grouping, @conditions, @range)
 
 	@range = range_in
-    sets = {}
     groups = []
+    sets = {}
+    order = {}
     max = 0
 
     if rows_in.size > 0 or rows_out.size > 0
       rows_in.each do |row|
-        group_name = RedmineCharts::GroupingUtils.to_string(row.group_id, @grouping)
+        group_name, order[group_name] = RedmineCharts::GroupingUtils.to_string_and_order(row.group_id, @grouping)
         index = @range[:keys].index(row.range_value.to_s)
         if index
           sets[group_name] ||= Array.new(@range[:keys].size, [0, ""])
@@ -30,7 +31,7 @@ class ChartsWorklistController < ChartsController
       end
 
       rows_out.each do |row|
-        group_name = RedmineCharts::GroupingUtils.to_string(row.group_id, @grouping)
+        group_name, order[group_name] = RedmineCharts::GroupingUtils.to_string_and_order(row.group_id, @grouping)
         index = @range[:keys].index(row.range_value.to_s)
         if index
           sets[group_name] ||= Array.new(@range[:keys].size, [0, ""])
@@ -61,7 +62,7 @@ class ChartsWorklistController < ChartsController
 	  end
     end 
 
-    sets = sets.sort.collect { |name, values| [name, values] }
+    sets = sets.sort_by{ |name, values| [order[name], name] }.collect { |name, values| [name, values] }
 	
     {
       :labels => @range[:labels],
