@@ -33,7 +33,7 @@ module RedmineCharts
     def self.to_options(project, types)
       conditions = {}
       projects = project.self_and_descendants.visible.all
-      members = project.members.collect { |a| [a.name, a.id] }.sort { |a,b| a[0].upcase <=> b[0].upcase }
+      members = project.members.collect { |a| [a.name, a.user_id] }.sort { |a,b| a[0].upcase <=> b[0].upcase }
       types.each do |type|
         case type
           when :user_ids then conditions[:user_ids] = members unless members.size == 0
